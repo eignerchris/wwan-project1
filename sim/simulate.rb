@@ -1,6 +1,7 @@
-# main program
-require 'env'
 require 'client'
+require 'utils'
+require 'pp'
+require 'environment'
 
 # CELL_RADIUESES      = [0.5, 0.75, 1]     # miles
 # BS_TX_POWERS        = [30, 40]           # dBm
@@ -11,13 +12,16 @@ require 'client'
 # NUM_USERS_PER_CELL = 25
 # CARRIER_FREQS      = []
 
-radius      = ARGV[1]
-power       = ARGV[2]
-block_size  = ARGV[3]
-target_bler = ARGV[4]
+radius      = ARGV[0].to_f
+power       = ARGV[1].to_f
+block_size  = ARGV[2].to_f
+target_bler = ARGV[3].to_f
 
 clients = []
-25.times { clients << Client.new rand(radius * 2), rand(radius * 2) }
+25.times do 
+  angle = rand(120)
+  clients << Client.new( radius * Math::cos(angle), radius * Math::sin(angle) )
+end
 
 e = Environment.new(radius, power, block_size, target_bler, clients)
-#e.simulate
+e.simulate
