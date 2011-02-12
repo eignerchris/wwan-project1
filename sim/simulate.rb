@@ -2,6 +2,7 @@ require 'client'
 require 'utils'
 require 'pp'
 require 'environment'
+require 'heatmap'
 
 # CELL_RADIUESES      = [0.5, 0.75, 1]     # miles
 # BS_TX_POWERS        = [30, 40]           # dBm

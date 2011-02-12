@@ -17,7 +17,7 @@ class Environment
   
   def simulate
     calc_interference
-    pp @coords
+    heatmap
   end
   
   # returns array of of polar coordinates inside a sector
@@ -36,4 +36,11 @@ class Environment
     end
   end
   
+  def heatmap
+    xs = @coords.collect { |coord| coord[1] * Math::cos(coord[0]) }
+    ys = @coords.collect { |coord| coord[1] * Math::sin(coord[0]) }
+    h = Heatmap.new(xs, ys)
+    h.generate
+    pp @coords
+  end
 end
