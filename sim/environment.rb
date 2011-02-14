@@ -1,18 +1,18 @@
 class Environment
   
   include Utils
+  include Math
   
-  attr_accessor :radius, :tx_power, :block_size, :bler, :env_area, :clients, :coords, :intferences
+  attr_accessor :radius, :tx_power, :block_size, :bler, :clients, :coords
   
   def initialize(r, p, b_size, bler, clients)
-    @radius        = r * 5280
-    @tx_power      = p
-    @block_size    = b_size
-    @bler          = bler
-    @env_area      = Math::PI * (@radius ** 2)
-    @clients       = clients
-    @coords        = init_coords
-    @interferences = {}
+    @radius       = r * 5280
+    @tx_power     = p
+    @block_size   = b_size
+    @bler         = bler
+    @clients      = clients
+    @cinrs        = []
+    init_grid_coords
   end
   
   def simulate
@@ -20,27 +20,26 @@ class Environment
     heatmap
   end
   
-  # returns array of of polar coordinates inside a sector
-  # each sector is 120 degrees
-  # steps 5 degrees and 20ft at a time.
-  # e.g. [ [0, 50], [0, 100], ..., [120, 0], [120, 50] ]
-  def init_coords
-    angles  = (0..120).step(10).to_a
-    lengths = (0..@radius).step(50).to_a
-    angles.product lengths
+  # returns array of of cartesian coordinates
+  # steps 5 degrees and 100ft at a time.
+  def init_grid_coords
+    angles  = (0..120).step(5).to_a                 # generate a list of angles through which to sweep
+    lengths  = (0..@radius).step(100).to_a          # generate a list of lengths along those angles from 0 to radius
+    polar_coords = angles.product lengths           # generate a list of pairs spanning all combinations
+    @coords = polar_to_cartesian(polar_coords)      # convert polar coordinates to cartesian coordinates
   end
   
+  # calculate total interference for all coordinates and store in a hash, indexed by the x, y pair
   def calc_interference
     @coords.each do |coord|
-      @interferences[coord] = first_tier_interference(coord)
+      fti = first_tier_interference(coord)
+      @cinrs << (@radius**-GAMMA)/(fti)
     end
   end
   
   def heatmap
-    xs = @coords.collect { |coord| coord[1] * Math::cos(coord[0]) }
-    ys = @coords.collect { |coord| coord[1] * Math::sin(coord[0]) }
-    h = Heatmap.new(xs, ys)
+    h = Heatmap.new(@coords, @cinrs)
     h.generate
-    pp @coords
   end
+
 end
