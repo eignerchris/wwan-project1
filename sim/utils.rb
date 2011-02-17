@@ -10,22 +10,15 @@ module Utils
   end
   
   def qpsk_ber(ebn0_db)
-    erfc(sqrt(0.5 * ebn0_db))
+    erfc(sqrt(0.5 * (10**ebn0_db)))
   end
   
   def qam16_ber(ebn0_db)
-    3/2 * erfc(sqrt(1/10 * ebn0_db))
+    3/2 * erfc(sqrt(1/10 * (10**ebn0_db)))
   end
   
-  def qam64_ber
-    
-  end
-  
-  # TODO: lookup table for mcs? 
-  def opt_mcs
-  end
-  
-  def avg_sector_cap
+  def qam64_ber(ebn0_db)
+    7/4 * erfc(sqrt(1/42 * (10**ebn0_db))) - (49/64 * erfc(sqrt(1/42 * (10**ebn0_db)))**2)
   end
   
   # returns sum of first tier interferers for a given polar coordinate
@@ -36,9 +29,8 @@ module Utils
     [i1, i2, i3].map { |val| val**(-GAMMA) }.inject { |r,x| r += x }
   end
   
-  def polar_to_cartesian(polar_coords)
-    cart_coords = polar_coords.collect do |coord|
-      [coord.last * cos(coord.first * (Math::PI/180)), coord.last * sin(coord.first * (Math::PI/180))]
-    end
+  def polar_to_cartesian(polar_coord)
+    [polar_coord.last * cos(polar_coord.first * (Math::PI/180)), polar_coord.last * sin(polar_coord.first * (Math::PI/180))]
   end
+  
 end
