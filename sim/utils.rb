@@ -13,7 +13,8 @@ module Utils
   # bs_height in meters, ms_height in meters, d in meters (converted to km), freq in MHz
   # returns path loss in dB
   def path_loss(d, freq)
-    d = d.abs/3.281   # convert to meters
+    # convert to meters
+    d = d.abs/3.281
     (44.9 - 6.55 * log10(BS_HEIGHT)) * log10(d/1000) + 45.5 + ( (35.46 - (1.1 * MS_HEIGHT) ) * log10(freq)) - 13.82 * log10(BS_HEIGHT) + (0.7 * MS_HEIGHT) + 3
   end
   
@@ -23,7 +24,11 @@ module Utils
   end
   
   def bler_to_ber(block_size, bler)
-    1 - (1 - bler)**(1/block_size)
+    1 - (1 - bler)**(1/block_size.to_f)
+  end
+  
+  def ber_to_bler(block_size, ber)
+    1 - (1 - ber)**(block_size.to_f)
   end
   
   def dB_to_watts(dB)
@@ -36,5 +41,17 @@ module Utils
   
   def q(x)
     0.5 * erfc(x / sqrt(2))
+  end
+  
+  def calc_bit_rate(n, ber)
+    symbol_rate * n * (1 - ber.to_f)
+  end
+  
+  def symbol_rate
+    2 * (BANDWIDTH_PER_SECTOR.to_f/25)
+  end
+  
+  def origin
+    [0,0]
   end
 end

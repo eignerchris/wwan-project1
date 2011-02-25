@@ -26,8 +26,10 @@ class Sector
     init_random_clients
     
     # iterate through each client in sector and determine opt mcs
-    @clients.each { |c| c.calc_opt_mcs(@target_bler) }
-    #gen_heatmap_datafile
+    @clients.each { |c| c.calc_opt_mcs(@block_size, @target_bler) }
+    
+    #heatmap
+    gen_heatmap_datafile
   end
   
   # returns array of of cartesian coordinates
@@ -42,17 +44,21 @@ class Sector
     # generate a list of all combinations of pairs using #product
     polar_coords = angles.product lengths
     
-    # convert all polar coordinates to cartesian coordinates
+    # convert all polar coordinates to cartesian coordinates, convert coords to ints
     @grid        = polar_coords.collect { |coord| polar_to_cartesian(coord).map {|val| val.to_i } }
+    
+    
   end
   
   # calculate total interference for all coordinates and store in a hash, indexed by the x, y pair
   def calc_interference_grid
+    @data = []
     @grid.each do |coord|
       src_path_loss = path_loss(cartesian_dist(origin, coord), @freq)
       rx_power      = @tx_power - src_path_loss
-      cinr          = rx_power - (10* log10(total_interference(coord)))
+      cinr          = rx_power - (10 * log10(total_interference(coord)))
       @cinrs[coord] = cinr
+      @data         << cinr
     end
   end
   
@@ -113,10 +119,15 @@ class Sector
     
   end
   
+  def heatmap
+    h = Heatmap.new(@grid, @cinrs)
+    h.generate
+  end
+  
   def gen_heatmap_datafile
-    f = File.new("heatmap.dat", "w")
+    f = File.open("heatmap.dat", "w")
     @grid.each do |point|
-      f.write "#{point.x} #{point.y} #{@cinrs[point] % 4}\n"
+      f.write "#{point.x} #{point.y} #{@cinrs[point] }\n"
     end
   end
   
@@ -136,12 +147,9 @@ class Sector
       puts "cinr: #{client.cinr}"
       puts "opt mcs: #{client.opt_mcs}"
       puts "dist from tower: #{client.dist_from_tower} ft."
-      puts "throughput: #{client.throughput}"
+      puts "bit rate: #{client.bit_rate}"
       puts ""
     end
   end
   
-  def origin
-    [0,0]
-  end
 end
