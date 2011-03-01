@@ -27,7 +27,7 @@ There are currently two ways to run a simulation at the moment.
 	
 		`ruby simulate.rb RADIUS TX_POWER BLOCK_SIZE TARGET_BLER`
 	
-	e.g.
+  e.g.
 		
 		`ruby simulate.rb 1 40 1000 0.05`
 
