@@ -1,0 +1,2 @@
+avg bit rate: 3.15342851097716
+avg capacity: 67.021858887425
